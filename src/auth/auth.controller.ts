@@ -1,9 +1,18 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Request,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { signUpCompanyDto } from './dto/signUpCompany.dto';
 import { signInDto } from './dto/signInDto.dto';
 import { AuthCompanyGuards } from './guards/auth.guard';
 import { Company } from 'src/companies/decorators/compnaies.decorator';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -15,8 +24,12 @@ export class AuthController {
   }
 
   @Post('company-signIn')
-  signInCompany(@Body() signInDto: signInDto) {
-    return this.authService.signInCompany(signInDto);
+  signInCompany(
+    @Request() req,
+    @Res({ passthrough: true }) res: Response,
+    @Body() signInDto: signInDto,
+  ) {
+    return this.authService.signInCompany(signInDto, res);
   }
 
   @Get('current-company')

@@ -17,6 +17,15 @@ export class Company {
   @Prop()
   industry: string;
 
+  @Prop()
+  stripeCustomerId: string;
+
+  @Prop({})
+  subscriptionId: string;
+
+  @Prop({ default: 'free' })
+  plan: string;
+
   //   @Prop()
   //   avatar: string;
 }

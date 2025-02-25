@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Company } from 'src/companies/schema/companies.schema';
@@ -26,9 +22,10 @@ export class AuthService {
     password,
   }: signUpCompanyDto) {
     const existingCompany = await this.companyModel.findOne({ email });
+    const companyNameExists = existingCompany?.name === name;
     console.log(existingCompany, 'existing company');
-    if (existingCompany)
-      throw new BadRequestException('company with this name already exists');
+    if (existingCompany || companyNameExists)
+      throw new BadRequestException('company with this Email already exists');
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newCompany = {
@@ -42,21 +39,30 @@ export class AuthService {
     return 'company registered successfully';
   }
 
-  async signInCompany({ email, password }: signInDto) {
+  async signInCompany({ email, password }: signInDto, res) {
+    // console.log(res, 'res');
     const company = await this.companyModel.findOne({ email });
     if (!company)
       throw new BadRequestException('email or passwoer is incorrect');
 
     const isPassEqual = await bcrypt.compare(password, company.password);
     if (!isPassEqual)
-      throw new BadRequestException('email or password is incorrect');
+      throw new BadRequestException('email or password is incorrect ');
 
     const payLoad = {
       companyId: company._id,
     };
 
-    const accesstoken = await this.jwtService.sign(payLoad);
-    return { accesstoken };
+    const accessToken = await this.jwtService.sign(payLoad);
+
+    res.cookie('accesstoken', accessToken, {
+      httpOnly: true,
+      secure: false,
+      maxAge: 60 * 60 * 2 * 1000,
+      sameSite: 'lax',
+      path: '/',
+    });
+    return res.json({ message: 'Login successful' });
   }
 
   async getCurrentUser(companyId) {
