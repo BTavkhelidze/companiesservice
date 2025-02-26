@@ -7,11 +7,14 @@ import * as bcrypt from 'bcrypt';
 import { signInDto } from './dto/signInDto.dto';
 import { JwtService } from '@nestjs/jwt';
 import { StripeService } from 'src/stripe/stripe.service';
+import { SignUpUsersDto } from './dto/signUpUsers.dto';
+import { User } from 'src/users/schema/user.schema';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel('company') private companyModel: Model<Company>,
+    @InjectModel('users') private userModel: Model<User>,
     private jwtService: JwtService,
     private stripeService: StripeService,
   ) {}
@@ -82,6 +85,29 @@ export class AuthService {
       path: '/',
     });
     return res.json({ message: 'Login successful' });
+  }
+
+  async signUpUsers(companyId: string, signUpDto: SignUpUsersDto) {
+    const { fullName, email, password } = signUpDto;
+    const user = await this.userModel.findOne({ email });
+    if (user) throw new BadRequestException('user already exists');
+
+    const company = await this.companyModel.findById(companyId);
+    if (!company) throw new BadRequestException('company not found');
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = {
+      fullName,
+      email,
+      companyId,
+      password: hashedPassword,
+    };
+    const resUser = await this.userModel.create(newUser);
+
+    await this.companyModel.findByIdAndUpdate(companyId, {
+      $push: { users: resUser },
+    });
+    return 'user created successfully';
   }
 
   async getCurrentUser(companyId) {

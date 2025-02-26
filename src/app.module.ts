@@ -7,6 +7,7 @@ import { CompaniesModule } from './companies/companies.module';
 import { AuthModule } from './auth/auth.module';
 import { StripeService } from './stripe/stripe.service';
 import { StripeModule } from './stripe/stripe.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { StripeModule } from './stripe/stripe.module';
     CompaniesModule,
     AuthModule,
     StripeModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService, StripeService],

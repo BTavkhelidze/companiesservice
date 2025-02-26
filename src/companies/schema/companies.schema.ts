@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import mongoose from 'mongoose';
 
 @Schema()
 export class Company {
@@ -26,6 +27,8 @@ export class Company {
   @Prop({ default: 'free' })
   plan: string;
 
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'users', default: [] })
+  users: mongoose.Schema.Types.ObjectId[];
   //   @Prop()
   //   avatar: string;
 }

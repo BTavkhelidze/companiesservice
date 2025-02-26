@@ -1,14 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateCompanyDto } from './dto/create-company.dto';
+
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Company } from './schema/companies.schema';
 import { subscriptionDto } from './dto/subscriptionDto.dto';
+import { User } from 'src/users/schema/user.schema';
 
 @Injectable()
 export class CompaniesService {
-  constructor(@InjectModel('company') private companyModel: Model<Company>) {}
+  constructor(
+    @InjectModel('company') private companyModel: Model<Company>,
+    @InjectModel('users') private userModel: Model<User>,
+  ) {}
 
   findAll() {
     return this.companyModel.find();
@@ -18,6 +22,12 @@ export class CompaniesService {
     const company = this.companyModel.findById(id);
     if (!company) throw new NotFoundException();
     return `This action returns a #${id} company`;
+  }
+
+  async findAllUsers(companyId) {
+    const result = await this.userModel.find({ companyId: companyId });
+    console.log(result, 'resssssssssssssss');
+    return result;
   }
 
   update(id: number, updateCompanyDto: UpdateCompanyDto) {

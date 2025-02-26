@@ -7,11 +7,14 @@ import { Company } from 'src/companies/schema/companies.schema';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { StripeService } from 'src/stripe/stripe.service';
+import { UserSchema } from 'src/users/schema/user.schema';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     MongooseModule.forFeature([{ name: 'company', schema: Company }]),
+    MongooseModule.forFeature([{ name: 'users', schema: UserSchema }]),
+
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET,
