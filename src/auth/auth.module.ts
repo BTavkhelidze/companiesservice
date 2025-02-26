@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Company } from 'src/companies/schema/companies.schema';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
+import { StripeService } from 'src/stripe/stripe.service';
 
 @Module({
   imports: [
@@ -18,6 +19,6 @@ import { ConfigModule } from '@nestjs/config';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, StripeService],
 })
 export class AuthModule {}

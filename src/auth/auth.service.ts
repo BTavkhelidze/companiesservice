@@ -6,12 +6,14 @@ import { signUpCompanyDto } from './dto/signUpCompany.dto';
 import * as bcrypt from 'bcrypt';
 import { signInDto } from './dto/signInDto.dto';
 import { JwtService } from '@nestjs/jwt';
+import { StripeService } from 'src/stripe/stripe.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel('company') private companyModel: Model<Company>,
     private jwtService: JwtService,
+    private stripeService: StripeService,
   ) {}
 
   async signUpCompany({
@@ -23,24 +25,41 @@ export class AuthService {
   }: signUpCompanyDto) {
     const existingCompany = await this.companyModel.findOne({ email });
     const companyNameExists = existingCompany?.name === name;
-    console.log(existingCompany, 'existing company');
-    if (existingCompany || companyNameExists)
-      throw new BadRequestException('company with this Email already exists');
+    if (existingCompany || companyNameExists) {
+      throw new BadRequestException(
+        'Company with this email or name already exists',
+      );
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newCompany = {
+    const customer = await this.stripeService.createCustomer(email);
+
+    const newCompany = new this.companyModel({
       email,
       name,
       country,
       industry,
       password: hashedPassword,
+      stripeCustomerId: customer.id,
+      subscriptionId: null,
+      plan: 'free',
+    });
+    await newCompany.save();
+
+    const session = await this.stripeService.createEmbeddedCheckoutSession(
+      customer.id,
+      'price_1QvwXRLBnqqETekESqovHYqo', // Free plan Price ID
+      `${process.env.NEXT_PUBLIC_API_URL}/success?session_id={CHECKOUT_SESSION_ID}&plan_name=free`,
+    );
+
+    return {
+      message: 'Company registered successfully',
+      companyId: newCompany._id,
+      clientSecret: session.clientSecret,
     };
-    await this.companyModel.create(newCompany);
-    return 'company registered successfully';
   }
 
   async signInCompany({ email, password }: signInDto, res) {
-    // console.log(res, 'res');
     const company = await this.companyModel.findOne({ email });
     if (!company)
       throw new BadRequestException('email or passwoer is incorrect');

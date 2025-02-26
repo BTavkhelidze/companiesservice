@@ -4,6 +4,7 @@ import { UpdateCompanyDto } from './dto/update-company.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Company } from './schema/companies.schema';
+import { subscriptionDto } from './dto/subscriptionDto.dto';
 
 @Injectable()
 export class CompaniesService {
@@ -23,6 +24,16 @@ export class CompaniesService {
     return `This action updates a #${id} company`;
   }
 
+  async updateSubscription(customerId: string, data: subscriptionDto) {
+    const company = await this.companyModel.findById(customerId);
+    if (!company) throw new NotFoundException('Company not found');
+
+    company.stripeCustomerId = data.stripeCustomerId;
+    company.subscriptionId = data.subscriptionId;
+    company.plan = data.plan;
+    await company.save();
+    return 'Subscription updated';
+  }
   remove(id: number) {
     return `This action removes a #${id} company`;
   }
