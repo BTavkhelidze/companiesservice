@@ -10,9 +10,11 @@ import {
   Req,
   BadRequestException,
   NotFoundException,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
-
+import { v4 as uuidv4 } from 'uuid';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { AuthCompanyGuards } from 'src/auth/guards/auth.guard';
 import { StripeService } from 'src/stripe/stripe.service';
@@ -22,6 +24,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Company } from './schema/companies.schema';
 import { CompanyId } from './decorators/compnaies.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { uploadFileDto } from 'src/users/dto/uploadFileBody.dto';
+import { AwsS3Service } from 'src/aws-files/awsFiles.service';
 
 @Controller('companies')
 @UseGuards(AuthCompanyGuards)
@@ -30,6 +35,7 @@ export class CompaniesController {
   constructor(
     private readonly companiesService: CompaniesService,
     private stripeService: StripeService,
+    private awsService: AwsS3Service,
     @InjectModel('company') private companyModel: Model<Company>,
   ) {}
 
@@ -41,6 +47,37 @@ export class CompaniesController {
   @Get('allUsers')
   async findAllUsers(@CompanyId() companyId) {
     return this.companiesService.findAllUsers(companyId);
+  }
+
+  @Get('/read-allFile')
+  getAllFileUrl() {
+    return this.awsService.getAllFileUrl();
+  }
+
+  @Post('/uploadFile')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadFile(
+    @CompanyId() id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() visibleOnlyFor: uploadFileDto,
+    // @CompanyId()
+  ) {
+    const path = uuidv4().toString();
+
+    // console.log(file.buffer, 'fileeeee');
+    const filePath = `files/${file.originalname ? file.originalname : path}`;
+
+    return this.companiesService.uploadFile(
+      filePath,
+      file.buffer,
+      id,
+      visibleOnlyFor,
+    );
+  }
+
+  @Post('/getFile')
+  getFile(@Body('filePath') filePath: string) {
+    return this.companiesService.getFile(filePath);
   }
 
   @Get(':id')

@@ -14,6 +14,8 @@ import { AuthCompanyGuards } from './guards/auth.guard';
 import { CompanyId } from 'src/companies/decorators/compnaies.decorator';
 import { Response } from 'express';
 import { SignUpUsersDto } from './dto/signUpUsers.dto';
+import { AuthUsersGuards } from './guards/authUser.guard';
+import { UserId } from 'src/users/decorators/user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -26,11 +28,18 @@ export class AuthController {
 
   @Post('company-signIn')
   signInCompany(
-    @Request() req,
     @Res({ passthrough: true }) res: Response,
     @Body() signInDto: signInDto,
   ) {
     return this.authService.signInCompany(signInDto, res);
+  }
+
+  @Post('signIn-user')
+  signInUser(
+    @Res({ passthrough: true }) res: Response,
+    @Body() signInUserDto: signInDto,
+  ) {
+    return this.authService.signInUser(signInUserDto, res);
   }
 
   @Post('signUp-users')
@@ -38,6 +47,12 @@ export class AuthController {
   signUpUsers(@CompanyId() companyId, @Body() signUpDto: SignUpUsersDto) {
     console.log(companyId, signUpDto, 'sdt');
     return this.authService.signUpUsers(companyId, signUpDto);
+  }
+
+  @Get('current-user')
+  @UseGuards(AuthUsersGuards)
+  getActiveUser(@UserId() userId) {
+    return this.authService.getActiveUser(userId);
   }
 
   @Get('current-company')

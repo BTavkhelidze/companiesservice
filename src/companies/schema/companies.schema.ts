@@ -31,6 +31,9 @@ export class Company {
   users: mongoose.Schema.Types.ObjectId[];
   //   @Prop()
   //   avatar: string;
+
+  @Prop({ type: [String], default: [] })
+  filesUrl: string[];
 }
 
 export const CompanySchema = SchemaFactory.createForClass(Company);

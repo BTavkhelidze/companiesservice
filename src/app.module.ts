@@ -9,6 +9,8 @@ import { StripeService } from './stripe/stripe.service';
 import { StripeModule } from './stripe/stripe.module';
 import { UsersModule } from './users/users.module';
 
+import { AwsFilesModule } from './aws-files/awsFiles.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -18,6 +20,8 @@ import { UsersModule } from './users/users.module';
     AuthModule,
     StripeModule,
     UsersModule,
+
+    AwsFilesModule,
   ],
   controllers: [AppController],
   providers: [AppService, StripeService],

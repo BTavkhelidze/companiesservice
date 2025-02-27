@@ -87,6 +87,30 @@ export class AuthService {
     return res.json({ message: 'Login successful' });
   }
 
+  async signInUser({ email, password }: signInDto, res) {
+    const user = await this.userModel.findOne({ email });
+    if (!user) throw new BadRequestException('email or passwoer is incorrect');
+
+    const isPassEqual = await bcrypt.compare(password, user.password);
+    if (!isPassEqual)
+      throw new BadRequestException('email or password is incorrect ');
+
+    const payLoad = {
+      userId: user._id,
+    };
+
+    const userToken = await this.jwtService.sign(payLoad);
+
+    res.cookie('usertoken', userToken, {
+      httpOnly: true,
+      secure: true,
+      maxAge: 60 * 60 * 2 * 1000,
+      sameSite: 'lax',
+      path: '/',
+    });
+    return res.json({ message: 'Login successful' });
+  }
+
   async signUpUsers(companyId: string, signUpDto: SignUpUsersDto) {
     const { fullName, email, password } = signUpDto;
     const user = await this.userModel.findOne({ email });
@@ -110,8 +134,12 @@ export class AuthService {
     return 'user created successfully';
   }
 
+  async getActiveUser(userId) {
+    const user = await this.userModel.findById(userId).select('-password');
+    return user;
+  }
+
   async getCurrentUser(companyId) {
-    console.log(companyId, 'id');
     const user = await this.companyModel
       .findById(companyId)
       .select('-password');

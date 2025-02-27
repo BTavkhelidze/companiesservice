@@ -14,8 +14,8 @@ export class User {
   @Prop()
   companyId: string;
 
-  // @Prop()
-  // fileId: string;
+  @Prop({ type: [String], default: [] })
+  filesUrl: string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
