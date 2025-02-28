@@ -28,6 +28,11 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @Post('/getFile')
+  getFile(@Body('filePath') filePath: string) {
+    return this.usersService.getFile(filePath);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
@@ -39,7 +44,6 @@ export class UsersController {
     @UserId() id: string,
     @UploadedFile() file: Express.Multer.File,
     @Body() visibleOnlyFor: uploadFileDto,
-    // @CompanyId()
   ) {
     const path = uuidv4().toString();
 

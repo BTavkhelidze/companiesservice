@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -20,6 +24,14 @@ export class CompaniesService {
     return this.companyModel.find();
   }
 
+  async removeUser(companyId: string, id: string) {
+    const company = await this.companyModel.findById(companyId);
+    if (!company) throw new NotFoundException('company not found');
+    console.log(company.name);
+    console.log(company.users, 'id');
+    // await this.companyModel.findByIdAndUpdate(companyId, {$pull: {company.users: id}})
+  }
+
   findOne(id) {
     const company = this.companyModel.findById(id);
     if (!company) throw new NotFoundException();
@@ -29,7 +41,18 @@ export class CompaniesService {
   async uploadFile(filePath, file, id, visibleOnlyFor) {
     const company = await this.companyModel.findById(id);
     if (!company) throw new NotFoundException('Not found');
-
+    if (company.filesUrl.length > 10 && company.plan === 'free')
+      throw new BadRequestException(
+        'You cant add new Files,  Please update subscription plan ',
+      );
+    if (company.filesUrl.length > 100 && company.plan === 'basic')
+      throw new BadRequestException(
+        'You cant add new Files,  Please update subscription plan ',
+      );
+    if (company.filesUrl.length > 1000 && company.plan === 'premium')
+      throw new BadRequestException(
+        'You cant add new Files,  Please update subscription plan ',
+      );
     const UploadedFile = await this.awsS3Service.uploadFile(
       filePath,
       file,
@@ -39,14 +62,17 @@ export class CompaniesService {
     );
     const res = UploadedFile;
 
-    // await this.userModel.findByIdAndUpdate(id, { $push: { filesUrl: res } });
     await this.companyModel.findByIdAndUpdate(id, {
       $push: { filesUrl: res },
     });
     return 'upload successfully';
   }
 
-  async getFile(filePath) {
+  async getFile(id) {
+    const company = await this.companyModel.findById(id);
+    if (!company) throw new NotFoundException('Not found');
+    const filePath = company.filesUrl;
+
     return await this.awsS3Service.getFileById(filePath);
   }
 

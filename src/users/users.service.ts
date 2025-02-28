@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -25,7 +29,14 @@ export class UsersService {
   async uploadFile(filePath, file, id, visibleOnlyFor) {
     const user = await this.userModel.findById(id);
     if (!user) throw new NotFoundException('Not found');
-
+    const company = await this.companyModel.findById(user.companyId);
+    if (!company) throw new NotFoundException('somthing not found');
+    if (company.filesUrl.length > 10 && company.plan === 'free')
+      throw new BadRequestException('You cant add new File ');
+    if (company.filesUrl.length > 100 && company.plan === 'basic')
+      throw new BadRequestException('You cant add new File');
+    if (company.filesUrl.length > 1000 && company.plan === 'premium')
+      throw new BadRequestException('You cant add new File');
     const UploadedFile = await this.awsS3Service.uploadFile(
       filePath,
       file,
@@ -40,6 +51,10 @@ export class UsersService {
       $push: { filesUrl: res },
     });
     return 'upload successfully';
+  }
+
+  async getFile(filePath) {
+    return await this.awsS3Service.getFileById(filePath);
   }
 
   findOne(id: number) {

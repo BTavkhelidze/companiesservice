@@ -57,27 +57,35 @@ export class AwsS3Service {
     return filePath;
   }
 
-  async getFileById(filePath: string) {
+  async getFileById(filePath) {
+    // console.log(filePath, '3');
     if (!filePath) throw new BadRequestException('fileId is required');
 
-    const config = {
-      Key: filePath,
-      Bucket: this.bucketName,
-    };
-    const getCommand = new GetObjectCommand(config);
-    const fileStream = await this.s3.send(getCommand);
-    if (fileStream.Body instanceof Readable) {
-      const chunck: Uint8Array[] = [];
-      for await (const chunk of fileStream.Body) {
-        chunck.push(chunk);
+    const result: string[] | null = [];
+
+    for (const file of filePath) {
+      console.log(file, '4');
+      const config = {
+        Key: file,
+        Bucket: this.bucketName,
+      };
+
+      const getCommand = new GetObjectCommand(config);
+      const fileStream = await this.s3.send(getCommand);
+      if (fileStream.Body instanceof Readable) {
+        const chunck: Uint8Array[] = [];
+        for await (const chunk of fileStream.Body) {
+          chunck.push(chunk);
+        }
+        const fileBuffer = Buffer.concat(chunck);
+
+        const base64 = fileBuffer.toString('base64');
+        const file = `data:${fileStream.ContentType};base64,${base64}`;
+
+        result.push(file);
       }
-      const fileBuffer = Buffer.concat(chunck);
-
-      const base64 = fileBuffer.toString('base64');
-      const file = `data:${fileStream.ContentType};base64,${base64}`;
-
-      return file;
     }
+    return result;
   }
 
   async getAllFileUrl() {

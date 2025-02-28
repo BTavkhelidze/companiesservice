@@ -60,11 +60,9 @@ export class CompaniesController {
     @CompanyId() id: string,
     @UploadedFile() file: Express.Multer.File,
     @Body() visibleOnlyFor: uploadFileDto,
-    // @CompanyId()
   ) {
     const path = uuidv4().toString();
 
-    // console.log(file.buffer, 'fileeeee');
     const filePath = `files/${file.originalname ? file.originalname : path}`;
 
     return this.companiesService.uploadFile(
@@ -75,9 +73,14 @@ export class CompaniesController {
     );
   }
 
-  @Post('/getFile')
-  getFile(@Body('filePath') filePath: string) {
-    return this.companiesService.getFile(filePath);
+  @Get('/getFile')
+  getFile(@CompanyId() id: string) {
+    return this.companiesService.getFile(id);
+  }
+
+  @Delete('/delete-user')
+  removeUser(@CompanyId() companyId: string, @Body('id') id: string) {
+    return this.companiesService.removeUser(companyId, id);
   }
 
   @Get(':id')
