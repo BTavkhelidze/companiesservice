@@ -10,7 +10,7 @@ export class StripeService {
   constructor(private configService: ConfigService) {
     const stripeKey = this.configService.get<string>('STRIPE_SECRET_KEY');
     if (!stripeKey) throw new Error('STRIPE_SECRET_KEY is missing');
-    this.stripe = new Stripe(stripeKey, { apiVersion: '2025-01-27.acacia' }); // Updated to a valid version
+    this.stripe = new Stripe(stripeKey, { apiVersion: '2025-02-24.acacia' }); // Updated to a valid version
   }
 
   async createCustomer(email: string): Promise<Stripe.Customer> {
