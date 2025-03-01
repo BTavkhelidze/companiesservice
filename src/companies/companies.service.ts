@@ -27,8 +27,7 @@ export class CompaniesService {
   async removeUser(companyId: string, id: string) {
     const company = await this.companyModel.findById(companyId);
     if (!company) throw new NotFoundException('company not found');
-    console.log(company.name);
-    console.log(company.users, 'id');
+
     // await this.companyModel.findByIdAndUpdate(companyId, {$pull: {company.users: id}})
   }
 

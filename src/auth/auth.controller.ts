@@ -45,7 +45,7 @@ export class AuthController {
   @Post('signUp-users')
   @UseGuards(AuthCompanyGuards)
   signUpUsers(@CompanyId() companyId, @Body() signUpDto: SignUpUsersDto) {
-    console.log(companyId, signUpDto, 'sdt');
+   
     return this.authService.signUpUsers(companyId, signUpDto);
   }
 
