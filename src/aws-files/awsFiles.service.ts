@@ -64,7 +64,6 @@ export class AwsS3Service {
     const result: string[] | null = [];
 
     for (const file of filePath) {
-      console.log(file, '4');
       const config = {
         Key: file,
         Bucket: this.bucketName,
