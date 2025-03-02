@@ -3,15 +3,14 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from './schema/user.schema';
 
-import { uploadFileDto } from './dto/uploadFileBody.dto';
 import { AwsS3Service } from 'src/aws-files/awsFiles.service';
-import { NotFound } from '@aws-sdk/client-s3';
+
 import { Company } from 'src/companies/schema/companies.schema';
 
 @Injectable()

@@ -8,7 +8,6 @@ import {
   UseGuards,
   Post,
   Req,
-  BadRequestException,
   NotFoundException,
   UploadedFile,
   UseInterceptors,

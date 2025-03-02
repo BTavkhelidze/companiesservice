@@ -64,18 +64,16 @@ export class StripeService {
 
   async updateSubscription(subscriptionId: string, newPriceId: string) {
     try {
-      // Retrieve the subscription to get the subscription item ID
       const subscription =
         await this.stripe.subscriptions.retrieve(subscriptionId);
 
-      // Update the subscription with the new price
       const updatedSubscription = await this.stripe.subscriptions.update(
         subscriptionId,
         {
           items: [
             {
-              id: subscription.items.data[0].id, // Use the first subscription item ID
-              price: newPriceId, // New price ID
+              id: subscription.items.data[0].id,
+              price: newPriceId,
             },
           ],
         },

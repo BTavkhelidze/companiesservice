@@ -47,7 +47,6 @@ export class UsersController {
   ) {
     const path = uuidv4().toString();
 
-    // console.log(file.buffer, 'fileeeee');
     const filePath = `files/${file.originalname ? file.originalname : path}`;
 
     return this.usersService.uploadFile(
