@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Body,
-  Patch,
   Param,
   Delete,
   UseInterceptors,
@@ -12,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { v4 as uuidv4 } from 'uuid';
-import { UpdateUserDto } from './dto/update-user.dto';
+
 import { FileInterceptor } from '@nestjs/platform-express';
 import { uploadFileDto } from './dto/uploadFileBody.dto';
 import { UserId } from './decorators/user.decorator';
@@ -55,11 +54,6 @@ export class UsersController {
       id,
       visibleOnlyFor,
     );
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
   }
 
   @Delete(':id')
