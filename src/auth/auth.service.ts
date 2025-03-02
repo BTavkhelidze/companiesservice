@@ -79,7 +79,7 @@ export class AuthService {
 
     res.cookie('accesstoken', accessToken, {
       httpOnly: true,
-      secure: false,
+      secure: true,
       maxAge: 60 * 60 * 2 * 1000,
       sameSite: 'lax',
       path: '/',
