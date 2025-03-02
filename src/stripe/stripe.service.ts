@@ -10,7 +10,7 @@ export class StripeService {
   constructor(private configService: ConfigService) {
     const stripeKey = this.configService.get<string>('STRIPE_SECRET_KEY');
     if (!stripeKey) throw new Error('STRIPE_SECRET_KEY is missing');
-    this.stripe = new Stripe(stripeKey, { apiVersion: '2025-02-24.acacia' }); // Updated to a valid version
+    this.stripe = new Stripe(stripeKey, { apiVersion: '2025-02-24.acacia' });
   }
 
   async createCustomer(email: string): Promise<Stripe.Customer> {
@@ -26,40 +26,6 @@ export class StripeService {
       items: [{ price: priceId }],
       payment_behavior: 'default_incomplete',
     });
-  }
-
-  async createEmbeddedCheckoutSession(
-    customerId: string,
-    priceId: string,
-    returnUrl: string,
-  ) {
-    const session = await this.stripe.checkout.sessions.create({
-      customer: customerId,
-      payment_method_types: ['card'],
-      mode: 'subscription',
-      line_items: [{ price: priceId, quantity: 1 }],
-      ui_mode: 'embedded',
-      return_url: returnUrl,
-      payment_method_collection: 'always',
-    });
-    return { clientSecret: session.client_secret };
-  }
-
-  async handleWebhookEvent(
-    event: Stripe.Event,
-  ): Promise<{ customerId: string; subscriptionId: string; priceId: string }> {
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object as Stripe.Checkout.Session;
-      const subscriptionId = session.subscription as string;
-      const customerId = session.customer as string;
-
-      const subscription =
-        await this.stripe.subscriptions.retrieve(subscriptionId);
-      const priceId = subscription.items.data[0].price.id;
-
-      return { customerId, subscriptionId, priceId };
-    }
-    throw new Error('Unhandled event type');
   }
 
   async updateSubscription(subscriptionId: string, newPriceId: string) {
