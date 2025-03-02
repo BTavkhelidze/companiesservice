@@ -84,7 +84,7 @@ export class AuthService {
       sameSite: 'lax',
       path: '/',
     });
-    return res.json({ message: 'Login successful' });
+    res.json({ message: 'Login suc cessful' });
   }
 
   async signInUser({ email, password }: signInDto, res) {
@@ -108,7 +108,7 @@ export class AuthService {
       sameSite: 'lax',
       path: '/',
     });
-    return res.json({ message: 'Login successful' });
+    res.json({ message: 'Login successful' });
   }
 
   async signUpUsers(companyId: string, signUpDto: SignUpUsersDto) {
@@ -117,9 +117,9 @@ export class AuthService {
     if (user) throw new BadRequestException('user already exists');
 
     const company = await this.companyModel.findById(companyId);
-    console.log(company, ';s');
+
     if (!company) throw new BadRequestException('company not found');
-    console.log(company.users, 'ssssssssssss');
+
     if (company.users.length >= 1 && company.plan === 'free') {
       throw new BadRequestException(
         'company plan is free and only one user is allowed',
