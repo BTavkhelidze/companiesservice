@@ -7,7 +7,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors({
-    origin: 'http://localhost:3001',
+    origin: 'https://companiesservice.onrender.com',
     credentials: true,
   });
   app.use(cookieParser());
