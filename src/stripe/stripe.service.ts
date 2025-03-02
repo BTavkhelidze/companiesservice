@@ -1,4 +1,3 @@
-// src/stripe/stripe.service.ts
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
@@ -26,6 +25,40 @@ export class StripeService {
       items: [{ price: priceId }],
       payment_behavior: 'default_incomplete',
     });
+  }
+
+  async createEmbeddedCheckoutSession(
+    customerId: string,
+    priceId: string,
+    returnUrl: string,
+  ) {
+    const session = await this.stripe.checkout.sessions.create({
+      customer: customerId,
+      payment_method_types: ['card'],
+      mode: 'subscription',
+      line_items: [{ price: priceId, quantity: 1 }],
+      ui_mode: 'embedded',
+      return_url: returnUrl,
+      payment_method_collection: 'always',
+    });
+    return { clientSecret: session.client_secret };
+  }
+
+  async handleWebhookEvent(
+    event: Stripe.Event,
+  ): Promise<{ customerId: string; subscriptionId: string; priceId: string }> {
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object as Stripe.Checkout.Session;
+      const subscriptionId = session.subscription as string;
+      const customerId = session.customer as string;
+
+      const subscription =
+        await this.stripe.subscriptions.retrieve(subscriptionId);
+      const priceId = subscription.items.data[0].price.id;
+
+      return { customerId, subscriptionId, priceId };
+    }
+    throw new Error('Unhandled event type');
   }
 
   async updateSubscription(subscriptionId: string, newPriceId: string) {
