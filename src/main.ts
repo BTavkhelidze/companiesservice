@@ -7,10 +7,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors({
-    origin: [
-      'https://companiesservice-front.vercel.app',
-      'http://localhost:3001',
-    ],
+    origin: ['https://companiesservice-front.vercel.app'],
     credentials: true,
   });
   app.use(cookieParser());
